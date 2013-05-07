@@ -1,11 +1,9 @@
 # encoding: utf-8
 
-require 'weibo_2'
-require 'time_ago_in_words'
+require 'rubygems'
+require 'bundler'
+Bundler.require
 
-%w(rubygems bundler).each { |dependency| require dependency }
-Bundler.setup
-%w(sinatra haml sass).each { |dependency| require dependency }
 enable :sessions
 
 WeiboOAuth2::Config.api_key = ENV['KEY']
@@ -65,12 +63,11 @@ post '/update' do
   client.get_token_from_hash({:access_token => session[:access_token], :expires_at => session[:expires_at]}) 
   statuses = client.statuses
 
-  unless params[:file] && (tmpfile = params[:file][:tempfile]) && (name = params[:file][:filename])
+  unless params[:file] && (pic = params[:file].delete(:tempfile))
     statuses.update(params[:status])
   else
     status = params[:status] || '图片'
-    pic = File.open(tmpfile.path)
-    statuses.upload(status, pic)
+    statuses.upload(status, pic, params[:file])
   end
 
   redirect '/'
