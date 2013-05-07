@@ -5,7 +5,7 @@ A example for [weibo_2](https://github.com/simsicon/weibo_2).
 
 ## Basic Usage
 
-The [example](https://github.com/simsicon/weibo_2_example) written with sinatra in this directory shows how to ask for oauth2 permission, get the token and send status with picture. It should cover basic usage in all ruby apps. You can run your own demo!
+The [example](https://github.com/simsicon/weibo_2_example) written with sinatra shows how to ask for oauth2 permission, get the token and send status with picture. It should cover basic usage in all ruby apps. You can run your own demo!
 
 ```bash
 $ KEY=change_this_to_your_key SECRET=change_this_to_your_secret REDIR_URI=change_this_to_your_redir_uri ruby example.rb
@@ -53,10 +53,13 @@ It should work.
     client.statuses.update(params[:status])
     ```
     
-    Upload a picture
+    Upload a picture.
         
     ```ruby
-    tmpfile = params[:file][:tempfile]
-    pic = File.open(tmpfile.path)
-    client.statuses.upload(params[:status], pic)
+    tmpfile = params[:file].delete(:tempfile)
+    File.open(tmpfile.path, 'rb'){|pic| client.statuses.upload(params[:status], pic, params[:file])}
     ```
+
+    pass params[:file] into upload method as options could help weibo_2 to build post body, useful options as:
+    *   filename, filename with extension of the uploading file, example 'pic.jpg'
+    *   type, mime type of the uploading file, example 'image/jpeg'
